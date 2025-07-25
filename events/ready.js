@@ -1,7 +1,9 @@
+const logger = require('../utils/logger.js');
+
 module.exports = {
   name: 'ready',
   once: true,
   execute(client) {
-    console.log(`✅ Source-chan conectada como ${client.user.tag}`);
+    logger.info(`Source-chan conectada como ${client.user.tag}`);
   },
 };
