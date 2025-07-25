@@ -30,6 +30,7 @@ for (const folder of commandFolders) {
     const command = require(filePath);
 
     if ('data' in command && 'execute' in command) {
+      command.__filename = filePath;
       client.commands.set(command.data.name, command);
     } else {
       console.warn(`[AVISO] O comando em ${filePath} está sem "data" ou "execute".`);
