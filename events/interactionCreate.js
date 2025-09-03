@@ -18,9 +18,9 @@ module.exports = {
       logger.error(`Erro ao executar ${interaction.commandName}: ${error.message}`);
 
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: 'Ocorreu um erro ao executar este comando.', ephemeral: true });
+        await interaction.followUp({ content: 'Ocorreu um erro ao executar este comando.', flags: 64 });
       } else {
-        await interaction.reply({ content: 'Ocorreu um erro ao executar este comando.', ephemeral: true });
+        await interaction.reply({ content: 'Ocorreu um erro ao executar este comando.', flags: 64 });
       }
     }
   },
