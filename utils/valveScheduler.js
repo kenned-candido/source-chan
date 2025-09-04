@@ -2,10 +2,30 @@ const { EmbedBuilder } = require('discord.js');
 const valveImages = require('../config/valve_images.json');
 const config = require('../config/config.json');
 const logger = require('./logger.js');
+const { URL } = require('url');
 
 function getRandomValveImage() {
   const index = Math.floor(Math.random() * valveImages.length);
   return valveImages[index];
+}
+
+function extractInfo(url) {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split('/').filter(Boolean);
+
+    const fileName = parts[parts.length - 1];
+    const folderPath = parts.slice(0, -1).join('/');
+
+    return {
+      fileName,
+      folderUrl: `${parsed.origin}/${folderPath}`,
+      relativePath: decodeURIComponent(folderPath)
+    };
+  } catch (err) {
+    logger.error(`Erro ao extrair info da URL ${url}: ${err}`);
+    return { fileName: url, folderUrl: url, relativePath: '' };
+  }
 }
 
 function generateDailySchedule() {
@@ -13,7 +33,6 @@ function generateDailySchedule() {
   const endHour = 21;
   const today = new Date();
 
-  // random number of images between 1 and 3
   const total = Math.floor(Math.random() * 3) + 1;
 
   const times = [];
@@ -24,19 +43,48 @@ function generateDailySchedule() {
     const run = new Date(today);
     run.setHours(randHour, randMinute, 0, 0);
 
-    if (run > today) {
-      times.push(run);
-    }
+    if (run > today) times.push(run);
   }
 
-  // Order chronologically
-  times.sort((a, b) => a - b);
+  return times.sort((a, b) => a - b);
+}
 
-  return times;
+function sendValveImage(channel, index = 1, total = 1) {
+  const url = getRandomValveImage();
+  const info = extractInfo(url);
+
+  logger.info(`Enviando imagem ${index}/${total} (${url})`);
+
+  const embed = new EmbedBuilder()
+    .setAuthor({
+      name: 'Valve Archive Result',
+      iconURL: 'https://valvearchive.com/logo_new.png',
+      url: 'https://valvearchive.com'
+    })
+    .setTitle(info.fileName)
+    .setDescription(
+      `${info.relativePath}/${info.fileName}\n\n` +
+      `**Encontrado na pasta:** ${info.folderUrl}`
+    )
+    .setImage(url)
+    .setColor(config.embedColor)
+    .setFooter({ iconURL: config.botAvatar, text: config.botName })
+    .setTimestamp();
+
+  channel.send({ embeds: [embed] })
+    .then(() => logger.info(`Imagem ${index}/${total} enviada às ${new Date().toLocaleString()}`))
+    .catch(err => logger.error(`Erro ao enviar imagem: ${err}`));
 }
 
 function scheduleDailyImages(channel) {
   const now = new Date();
+
+  if (config.sendOnStartup) {
+    logger.info("⚡ Modo de teste ativo: enviando imagem imediata ao iniciar.");
+    sendValveImage(channel, 1, 1);
+    return;
+  }
+
   let schedule = generateDailySchedule();
 
   logger.info(`Hoje serão enviadas ${schedule.length} imagens.`);
@@ -46,24 +94,9 @@ function scheduleDailyImages(channel) {
 
   schedule.forEach((runTime, i) => {
     const delay = runTime - now;
-
-    setTimeout(() => {
-      const url = getRandomValveImage();
-      logger.info(`Enviando imagem ${i + 1}/${schedule.length} (${url})`);
-
-      const embed = new EmbedBuilder()
-        .setTitle("📷 Valve Archive")
-        .setImage(url)
-        .setColor(config.embedColor)
-        .setFooter({ text: "Imagem aleatória do Valve Archive" });
-
-      channel.send({ embeds: [embed] })
-        .then(() => logger.info(`Imagem ${i + 1}/${schedule.length} enviada às ${new Date().toLocaleString()}`))
-        .catch(err => logger.error(`Erro ao enviar imagem: ${err}`));
-    }, delay);
+    setTimeout(() => sendValveImage(channel, i + 1, schedule.length), delay);
   });
 
-  // Reschedule for tomorrow
   const midnight = new Date(now);
   midnight.setHours(24, 0, 0, 0);
   const msUntilMidnight = midnight - now;

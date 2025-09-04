@@ -9,8 +9,7 @@ module.exports = {
 
   async execute(interaction) {
     const embed = new EmbedBuilder()
-      .setTitle(`${config.botName}`)
-      .setDescription('Sou um bot criado para auxiliar, divertir e interagir com os membros!')
+      .setDescription('Sou Yumi Takahashi, também conhecida como Source-chan! Estou aqui para ajudar, divertir e interagir com todos vocês!')
       .addFields(
         { name: 'Versão', value: config.version, inline: true },
         { name: 'Linguagem', value: 'JavaScript (Node.js)', inline: true },

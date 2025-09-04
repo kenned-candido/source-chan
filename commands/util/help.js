@@ -42,13 +42,13 @@ module.exports = {
                         partes.includes('util') ? 'Utilitários' : 'Outros';
 
       if (!categorias[categoria]) categorias[categoria] = [];
-      categorias[categoria].push(`</${nome}:> — ${comando.data.description}`);
+      categorias[categoria].push(`**<${nome}>** ${comando.data.description}`);
     }
 
     const embed = new EmbedBuilder()
       .setTitle('Comandos disponíveis')
       .setColor(config.embedColor)
-      .setFooter({ text: `Use /help [comando] para mais detalhes.` })
+      .setFooter({ text: 'Use /help [comando] para mais detalhes.' })
       .setTimestamp();
 
     for (const [categoria, comandos] of Object.entries(categorias)) {

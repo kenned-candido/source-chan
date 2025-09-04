@@ -6,6 +6,7 @@ module.exports = {
     .setDescription('Diz olá para o usuário.'),
   
   async execute(interaction) {
-    await interaction.reply(`Olá, ${interaction.user.username}!`);
+    const displayName = interaction.user.globalName || interaction.user.username;
+    await interaction.reply(`Olá, ${displayName}!`);
   },
 };
