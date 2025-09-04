@@ -33,7 +33,7 @@ function generateDailySchedule() {
   const endHour = 21;
   const today = new Date();
 
-  const total = Math.floor(Math.random() * 3) + 1;
+  const total = Math.floor(Math.random() * 3) + 1; // 1 a 3 images
 
   const times = [];
   while (times.length < total) {
@@ -68,7 +68,7 @@ function sendValveImage(channel, index = 1, total = 1) {
     )
     .setImage(url)
     .setColor(config.embedColor)
-    .setFooter({ iconURL: config.botAvatar, text: config.botName })
+    .setFooter({ text: config.botName })
     .setTimestamp();
 
   channel.send({ embeds: [embed] })
@@ -78,13 +78,6 @@ function sendValveImage(channel, index = 1, total = 1) {
 
 function scheduleDailyImages(channel) {
   const now = new Date();
-
-  if (config.sendOnStartup) {
-    logger.info("⚡ Modo de teste ativo: enviando imagem imediata ao iniciar.");
-    sendValveImage(channel, 1, 1);
-    return;
-  }
-
   let schedule = generateDailySchedule();
 
   logger.info(`Hoje serão enviadas ${schedule.length} imagens.`);
@@ -104,4 +97,4 @@ function scheduleDailyImages(channel) {
   setTimeout(() => scheduleDailyImages(channel), msUntilMidnight);
 }
 
-module.exports = { scheduleDailyImages };
+module.exports = { scheduleDailyImages, sendValveImage };
