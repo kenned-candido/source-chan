@@ -2,8 +2,8 @@
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=32&pause=1000&color=69F869&center=true&vCenter=true&width=1000&lines=SOURCE-CHAN)](https://git.io/typing-svg)
 
-[![Licença AGPLv3](https://img.shields.io/badge/Licença-AGPLv3-69f869.svg)](http://perso.crans.org/besson/LICENSE.html)
-[![feito-com-javascript](https://img.shields.io/badge/Feito%20com-JS-69f869.svg)](https://www.python.org/)
+[![Licença AGPLv3](https://img.shields.io/badge/Licença-AGPLv3-69f869.svg)](https://www.gnu.org/licenses/agpl-3.0.pt-br.html)
+[![feito-com-javascript](https://img.shields.io/badge/Feito%20com-discord.js-69f869.svg)](https://discord.js.org/)
 [![Discord](https://img.shields.io/discord/1189628376504340590?logo=Discord&label=Servidor%20no%20Discord&color=69f869)](https://discord.gg/tVNv6SNZZT)
 ![Versão](https://img.shields.io/badge/Versão-1.0-69f869.svg)
 
