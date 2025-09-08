@@ -1,11 +1,11 @@
 <img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=cd00cc&height=85&section=header"/>
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=32&pause=1000&color=cd00cc&center=true&vCenter=true&width=1000&lines=SOURCE-CHAN)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=700&size=32&pause=1000&color=cd00cc&center=true&vCenter=true&width=1000&lines=SOURCE-CHAN)](https://git.io/typing-svg)
 
 <div align=center>
   
 [![Licença AGPLv3](https://img.shields.io/badge/Licença-AGPLv3-cd00cc.svg)](https://www.gnu.org/licenses/agpl-3.0.pt-br.html)
-[![feito-com-javascript](https://img.shields.io/badge/Feito%20com-discord.js-cd00cc.svg)](https://discord.js.org/)
+[![feito-com-javascript](https://img.shields.io/badge/Feita%20com-discord.js-cd00cc.svg)](https://discord.js.org/)
 [![Discord](https://img.shields.io/discord/1189628376504340590?logo=Discord&label=Servidor%20no%20Discord&color=cd00cc)](https://discord.gg/tVNv6SNZZT)
 ![Versão](https://img.shields.io/badge/Versão-1.0-cd00cc.svg)
 </div>
@@ -14,7 +14,7 @@
 
 ---
 
-Source-chan é um bot para Discord desenvolvido pela comunidade Source BR. Inspirada e integrada à equipe, ela é um projeto open source que reúne funções úteis e divertidas. Seu objetivo é apoiar a equipe no trabalho e no desenvolvimento de projetos, interagir e entreter a comunidade, além de auxiliar na administração do servidor.
+Source-chan é um bot para Discord desenvolvido para comunidade Source BR. Inspirada e integrada à equipe, ela é um projeto open source que reúne funções úteis e divertidas. Seu objetivo é apoiar a equipe no trabalho e no desenvolvimento de projetos, interagir e entreter a comunidade, além de auxiliar na administração do servidor.
 
 [Documentação]()
 
