@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const valveImages = require('../config/valve_images.json');
+const valveImages = require('../config/valve_archive.json');
 const config = require('../config/config.json');
 const logger = require('./logger.js');
 const { URL } = require('url');
@@ -14,7 +14,8 @@ function extractInfo(url) {
     const parsed = new URL(url);
     const parts = parsed.pathname.split('/').filter(Boolean);
 
-    const fileName = parts[parts.length - 1];
+    // Decodes file name and path
+    const fileName = decodeURIComponent(parts[parts.length - 1]);
     const folderPath = parts.slice(0, -1).join('/');
 
     return {
@@ -33,7 +34,7 @@ function generateDailySchedule() {
   const endHour = 21;
   const today = new Date();
 
-  const total = Math.floor(Math.random() * 3) + 1; // 1 a 3 images
+  const total = Math.floor(Math.random() * 3) + 1;
 
   const times = [];
   while (times.length < total) {
@@ -68,7 +69,7 @@ function sendValveImage(channel, index = 1, total = 1) {
     )
     .setImage(url)
     .setColor(config.embedColor)
-    .setFooter({ text: config.botName })
+    .setFooter({ iconURL: config.botAvatar, text: config.botName })
     .setTimestamp();
 
   channel.send({ embeds: [embed] })
