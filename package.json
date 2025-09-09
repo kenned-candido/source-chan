@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "better-sqlite3": "^12.2.0",
     "chalk": "^4.1.2",
     "dayjs": "^1.11.13",
     "discord.js": "^14.0.0",

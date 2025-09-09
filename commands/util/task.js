@@ -3,6 +3,7 @@ const {
 } = require('discord.js');
 const config = require('../../config/config.json');
 const logger = require('../../utils/logger.js');
+const db = require('../../database/db');
 
 // --- Configurable emojis ---
 // Status Icons
@@ -130,6 +131,14 @@ module.exports = {
 
       // initialize cursor at 0
       taskCursors.set(msg.id, 0);
+
+      // save in bank
+      db.createList({
+        id: msg.id,
+        userId: interaction.user.id,
+        title,
+        tasks: items
+      });
       return;
     }
 
@@ -170,6 +179,13 @@ module.exports = {
         await msg.edit({ embeds: [embed], components: msg.components });
         logger.info(`Lista ${messageId} editada com sucesso por ${interaction.user.tag}`);
         await interaction.deferUpdate();
+
+        // update in bank
+        db.updateList({
+          id: messageId,
+          title,
+          tasks: finalItems
+        });
       } catch (err) {
         logger.error(`Erro ao editar lista: ${err.message}`);
         await interaction.reply({ content: 'Não consegui editar a lista.', flags: 64 });
@@ -209,10 +225,13 @@ module.exports = {
         break;
 
       case 'task_delete':
-        taskCursors.delete(message.id);
-        await message.delete();
-        await interaction.reply({ content: 'Lista deletada!', flags: 64 });
-        return;
+      taskCursors.delete(message.id);
+
+      // remove from bank
+      db.deleteList(message.id);
+
+      await message.delete();
+      return;
 
       case 'task_edit': {
         // Build modal prefilled with cleaned title and items (without emojis/pointer)
@@ -266,5 +285,12 @@ module.exports = {
 
     // update the message
     await interaction.update({ embeds: [newEmbed], components: message.components });
+
+    // save updated progress
+    db.updateList({
+      id: message.id,
+      title: titleBase,
+      tasks: items
+    });
   },
 };

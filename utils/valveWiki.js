@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const valveWiki = require('../config/valve_wiki.json');
+const valveWiki = require('../database/valve_wiki.json');
 const config = require('../config/config.json');
 const logger = require('./logger.js');
 const { URL } = require('url');
