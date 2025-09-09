@@ -3,31 +3,31 @@ const {
   SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle,
 } = require('discord.js');
 const config = require('../../config/config.json');
+const logger = require('../../utils/logger.js');
 
-// Esses são os emojis que eu adicionei ao meu bot, você tera que alterar para os seus
-/* Icons list:
-    <a:1339687866451759236:1414681424304406562> => cursor
-    <:1385088692829425826:1414681411201536052> =>checked
-    <:1385088677818011679:1414681401672073247> => unchecked
-*/
-/* Icons botons:
-    ↑ => up
-    ↓ => down
-    <:1339687857010249894:1414681385716809928> => check
-    <:1339687841936183387:1414681372467138682> => unchecked
-    <:1385088663020371988:1414681447771541535> => delete
-*/
+// --- Emojis configuráveis ---
+// Ícones de status
+const ICON_CURSOR = '<a:1339687866451759236:1414681424304406562>'; // cursor
+const ICON_CHECKED = '<:1385088692829425826:1414681411201536052>'; // checked
+const ICON_UNCHECKED = '<:1385088677818011679:1414681401672073247>'; // unchecked
+
+// Ícones dos botões (se quiser usar no label futuramente)
+const ICON_UP = '↑';
+const ICON_DOWN = '↓';
+const ICON_BTN_CHECK = '<:1385088692829425826:1414681411201536052>';
+const ICON_BTN_EDIT = '✏️';
+const ICON_BTN_DELETE = '🗑️';
 
 const taskCursors = new Map(); // messageId -> cursor index
 
 // Build the action row with buttons (reusable)
 function buildTaskButtons() {
   return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('task_up').setLabel('↑').setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId('task_down').setLabel('↓').setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId('task_toggle').setLabel('Check/Uncheck').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId('task_edit').setLabel('Editar').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('task_delete').setLabel('Deletar').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId('task_up').setLabel(ICON_UP).setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('task_down').setLabel(ICON_DOWN).setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('task_toggle').setEmoji(ICON_BTN_CHECK).setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('task_edit').setEmoji(ICON_BTN_EDIT).setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('task_delete').setEmoji(ICON_BTN_DELETE).setStyle(ButtonStyle.Danger),
   );
 }
 
@@ -36,18 +36,23 @@ function parseItemsFromDescription(description) {
   if (!description) return [];
   const lines = description.split('\n').map(l => l.trim()).filter(Boolean);
   return lines.map(line => {
-    // remove pointer if present
-    let s = line.replace(/^→\s*/, '');
-    // detect done/undone
-    let done = false;
-    if (/^✅\s?/.test(s)) {
-      done = true;
-      s = s.replace(/^✅\s?/, '');
-    } else if (/^❌\s?/.test(s)) {
-      done = false;
-      s = s.replace(/^❌\s?/, '');
+    // remove pointer (cursor) se presente
+    let s = line;
+    if (s.startsWith(ICON_CURSOR)) {
+      s = s.slice(ICON_CURSOR.length).trim();
     }
-    // final trim
+
+    // detect done/undone usando startsWith (sem regex)
+    let done = false;
+    if (s.startsWith(ICON_CHECKED)) {
+      done = true;
+      s = s.slice(ICON_CHECKED.length).trim();
+    } else if (s.startsWith(ICON_UNCHECKED)) {
+      done = false;
+      s = s.slice(ICON_UNCHECKED.length).trim();
+    }
+
+    // final trim (segurança)
     s = s.trim();
     return { text: s, done };
   });
@@ -56,11 +61,12 @@ function parseItemsFromDescription(description) {
 // Format items back to description strings, highlighting cursor
 function formatItemsForDescription(items, cursor = 0) {
   return items.map((it, i) => {
-    const status = it.done ? '✅' : '❌';
-    const prefix = i === cursor ? '→ ' : '';
+    const status = it.done ? ICON_CHECKED : ICON_UNCHECKED;
+    const prefix = i === cursor ? `${ICON_CURSOR} ` : '';
     return `${prefix}${status} ${it.text}`;
   }).join('\n');
 }
+
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -130,50 +136,46 @@ module.exports = {
 
     // Editar lista existente
     if (interaction.customId.startsWith('taskEditModal_')) {
-    const messageId = interaction.customId.split('_')[1];
-    const title = interaction.fields.getTextInputValue('taskTitle');
-    const itemsRaw = interaction.fields.getTextInputValue('taskItems');
-    const newItems = itemsRaw.split('\n').map(i => i.trim()).filter(Boolean);
+      const messageId = interaction.customId.split('_')[1];
+      const title = interaction.fields.getTextInputValue('taskTitle');
+      const itemsRaw = interaction.fields.getTextInputValue('taskItems');
+      const newItems = itemsRaw.split('\n').map(i => i.trim()).filter(Boolean);
 
-    try {
+      try {
         const channel = await client.channels.fetch(interaction.channelId);
         const msg = await channel.messages.fetch(messageId);
         const oldEmbed = msg.embeds[0];
 
-        let oldItems = oldEmbed.description?.split('\n') || [];
+        // parse dos itens antigos usando a função robusta
+        const oldItems = parseItemsFromDescription(oldEmbed.description);
 
-        // Mapear os itens que estavam como ✅
-        const checkedSet = new Set(
-        oldItems
-            .map(i => i.replace(/^👉 /, '').trim())
-            .filter(i => i.startsWith('✅'))
-            .map(i => i.replace(/^✅ /, '').trim())
-        );
+        // set de textos checados normalizados (lowercase + trim)
+        const checkedSet = new Set(oldItems.filter(it => it.done).map(it => it.text.toLowerCase().trim()));
 
-        // Reaplicar ✅ nos novos itens, se eles estavam checados antes
-        const finalItems = newItems.map(i => {
-        if (checkedSet.has(i)) return `✅ ${i}`;
-        return `❌ ${i}`;
-        });
+        // reaplicar estado: compara normalized strings (mantém checks existentes)
+        const finalItems = newItems.map(t => ({
+          text: t,
+          done: checkedSet.has(t.toLowerCase().trim()),
+        }));
 
-        const done = finalItems.filter(i => i.startsWith('✅')).length;
-        const percent = Math.round((done / finalItems.length) * 100);
+        const doneCount = finalItems.filter(it => it.done).length;
+        const percent = finalItems.length === 0 ? 0 : Math.round((doneCount / finalItems.length) * 100);
 
         const embed = new EmbedBuilder()
-        .setTitle(`${title} [${percent}%]`)
-        .setDescription(finalItems.join('\n'))
-        .setColor(config.embedColor)
-        .setFooter({ text: 'Use os botões abaixo para gerenciar sua lista' })
-        .setTimestamp();
+          .setTitle(`${title} [${percent}%]`)
+          .setDescription(formatItemsForDescription(finalItems, 0))
+          .setColor(config.embedColor)
+          .setFooter({ text: 'Use os botões abaixo para gerenciar sua lista' })
+          .setTimestamp();
 
         await msg.edit({ embeds: [embed], components: msg.components });
-        await interaction.reply({ content: '✅ Lista editada com sucesso!', flags: 64 });
-    } catch (err) {
+        logger.info(`Lista ${messageId} editada com sucesso por ${interaction.user.tag}`);
+      } catch (err) {
         logger.error(`Erro ao editar lista: ${err.message}`);
-        await interaction.reply({ content: '❌ Não consegui editar a lista.', flags: 64 });
+        await interaction.reply({ content: 'Não consegui editar a lista.', flags: 64 });
+      }
     }
-    }
-        },
+      },
 
   // --- Button handler ---
   async handleButtonInteraction(interaction, client) {
