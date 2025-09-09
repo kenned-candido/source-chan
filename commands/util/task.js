@@ -225,13 +225,23 @@ module.exports = {
         break;
 
       case 'task_delete':
-      taskCursors.delete(message.id);
+        taskCursors.delete(message.id);
 
-      // remove from bank
-      db.deleteList(message.id);
+        // remove do banco
+        const deleted = db.deleteList(message.id);
 
-      await message.delete();
-      return;
+        if (deleted) {
+          logger.info(
+            `Lista ${message.id} deletada por ${interaction.user.tag} (${interaction.user.id})`
+          );
+        } else {
+          logger.warn(
+            `Tentativa de deletar lista inexistente: ${message.id} por ${interaction.user.tag}`
+          );
+        }
+
+        await message.delete();
+        return;
 
       case 'task_edit': {
         // Build modal prefilled with cleaned title and items (without emojis/pointer)

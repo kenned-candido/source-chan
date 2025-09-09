@@ -11,20 +11,35 @@ db.prepare(`
     user_id TEXT,
     title TEXT,
     tasks TEXT, -- JSON string
-    created_at INTEGER
+    created_at INTEGER,
+    updated_at INTEGER
   )
 `).run();
 
-// Create a new task list
-function createList({ id, userId, title, tasks }) {
-  const stmt = db.prepare(`
-    INSERT INTO task_lists (id, user_id, title, tasks, created_at)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  stmt.run(id, userId, title, JSON.stringify(tasks), Date.now());
+// index to speed up queries per user
+db.prepare(`
+  CREATE INDEX IF NOT EXISTS idx_user_id ON task_lists(user_id)
+`).run();
+
+// useful for secure JSON parsing
+function safeParse(json, fallback = []) {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return fallback;
+  }
 }
 
-// Search list by ID
+// create a new list
+function createList({ id, userId, title, tasks }) {
+  const stmt = db.prepare(`
+    INSERT INTO task_lists (id, user_id, title, tasks, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  stmt.run(id, userId, title, JSON.stringify(tasks), Date.now(), Date.now());
+}
+
+// search list by ID
 function getList(id) {
   const row = db.prepare(`
     SELECT * FROM task_lists WHERE id = ?
@@ -33,29 +48,30 @@ function getList(id) {
   if (!row) return null;
   return {
     ...row,
-    tasks: JSON.parse(row.tasks)
+    tasks: safeParse(row.tasks)
   };
 }
 
-// Update an existing list
+// update existing list
 function updateList({ id, title, tasks }) {
   const stmt = db.prepare(`
     UPDATE task_lists
-    SET title = ?, tasks = ?
+    SET title = ?, tasks = ?, updated_at = ?
     WHERE id = ?
   `);
-  stmt.run(title, JSON.stringify(tasks), id);
+  stmt.run(title, JSON.stringify(tasks), Date.now(), id);
 }
 
-// Deletes a list by ID
+// delete list by ID
 function deleteList(id) {
   const stmt = db.prepare(`
     DELETE FROM task_lists WHERE id = ?
   `);
-  stmt.run(id);
+  const result = stmt.run(id);
+  return result.changes > 0; // true if actually deleted
 }
 
-// Returns all lists for a user
+// returns all lists for a user
 function getUserLists(userId) {
   const rows = db.prepare(`
     SELECT * FROM task_lists WHERE user_id = ?
@@ -63,7 +79,7 @@ function getUserLists(userId) {
 
   return rows.map(r => ({
     ...r,
-    tasks: JSON.parse(r.tasks)
+    tasks: safeParse(r.tasks)
   }));
 }
 
