@@ -6,7 +6,7 @@ require('dotenv').config();
 // Command list
 const commands = [];
 
-// Path to commands
+// Path to command folders
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
@@ -30,17 +30,22 @@ for (const folder of commandFolders) {
 // Initialize the REST API with the token
 const rest = new REST().setToken(process.env.TOKEN);
 
-// Logs commands on the specific server
+// Multiple guilds in .env, separated by comma
+const guildIds = process.env.GUILD_IDS.split(',').map(id => id.trim());
+
 (async () => {
   try {
     console.log(`Iniciando o registro de ${commands.length} comando(s)...`);
 
-    await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
-      { body: commands },
-    );
+    for (const guildId of guildIds) {
+      await rest.put(
+        Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId),
+        { body: commands },
+      );
+      console.log(`Comandos registrados no servidor ${guildId}`);
+    }
 
-    console.log('Comandos registrados com sucesso.');
+    console.log('Todos os comandos foram registrados com sucesso.');
   } catch (error) {
     console.error('Erro ao registrar comandos:', error);
   }
