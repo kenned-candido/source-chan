@@ -1,17 +1,16 @@
-// commands/util/task.js
 const {
   SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle,
 } = require('discord.js');
 const config = require('../../config/config.json');
 const logger = require('../../utils/logger.js');
 
-// --- Emojis configuráveis ---
-// Ícones de status
-const ICON_CURSOR = '<a:1339687866451759236:1414681424304406562>'; // cursor
-const ICON_CHECKED = '<:1385088692829425826:1414681411201536052>'; // checked
-const ICON_UNCHECKED = '<:1385088677818011679:1414681401672073247>'; // unchecked
+// --- Configurable emojis ---
+// Status Icons
+const ICON_CURSOR = '<a:1339687866451759236:1414681424304406562>';
+const ICON_CHECKED = '<:1385088692829425826:1414681411201536052>';
+const ICON_UNCHECKED = '<:1385088677818011679:1414681401672073247>';
 
-// Ícones dos botões (se quiser usar no label futuramente)
+// Button icons
 const ICON_UP = '↑';
 const ICON_DOWN = '↓';
 const ICON_BTN_CHECK = '<:1385088692829425826:1414681411201536052>';
@@ -42,7 +41,7 @@ function parseItemsFromDescription(description) {
       s = s.slice(ICON_CURSOR.length).trim();
     }
 
-    // detect done/undone usando startsWith (sem regex)
+    // detect done/undone using startsWith (no regex)
     let done = false;
     if (s.startsWith(ICON_CHECKED)) {
       done = true;
@@ -52,7 +51,7 @@ function parseItemsFromDescription(description) {
       s = s.slice(ICON_UNCHECKED.length).trim();
     }
 
-    // final trim (segurança)
+    // final trim (security)
     s = s.trim();
     return { text: s, done };
   });
@@ -78,7 +77,7 @@ module.exports = {
         .setDescription('Cria uma nova lista de tarefas')
     ),
 
-  // Executa o slash command — abre modal
+  // Execute slash command — open modal
   async execute(interaction) {
     if (interaction.options.getSubcommand() === 'list') {
       const modal = new ModalBuilder()
@@ -108,7 +107,7 @@ module.exports = {
     }
   },
 
-  // --- Modal Submit handler (criação e edição) ---
+  // --- Modal Submit handler (creation and editing) ---
   async handleModalSubmit(interaction, client) {
     // New list modal
     if (interaction.customId === 'taskListModal') {
@@ -134,7 +133,7 @@ module.exports = {
       return;
     }
 
-    // Editar lista existente
+    // Edit existing list
     if (interaction.customId.startsWith('taskEditModal_')) {
       const messageId = interaction.customId.split('_')[1];
       const title = interaction.fields.getTextInputValue('taskTitle');
@@ -146,13 +145,13 @@ module.exports = {
         const msg = await channel.messages.fetch(messageId);
         const oldEmbed = msg.embeds[0];
 
-        // parse dos itens antigos usando a função robusta
+        // parse the old items using the robust function
         const oldItems = parseItemsFromDescription(oldEmbed.description);
 
-        // set de textos checados normalizados (lowercase + trim)
+        // set of normalized checked texts (lowercase + trim)
         const checkedSet = new Set(oldItems.filter(it => it.done).map(it => it.text.toLowerCase().trim()));
 
-        // reaplicar estado: compara normalized strings (mantém checks existentes)
+        // reapply state: compares normalized strings (keeps existing checks)
         const finalItems = newItems.map(t => ({
           text: t,
           done: checkedSet.has(t.toLowerCase().trim()),
@@ -170,6 +169,7 @@ module.exports = {
 
         await msg.edit({ embeds: [embed], components: msg.components });
         logger.info(`Lista ${messageId} editada com sucesso por ${interaction.user.tag}`);
+        await interaction.deferUpdate();
       } catch (err) {
         logger.error(`Erro ao editar lista: ${err.message}`);
         await interaction.reply({ content: 'Não consegui editar a lista.', flags: 64 });
