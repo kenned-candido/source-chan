@@ -7,7 +7,7 @@ module.exports = {
   execute(client) {
     logger.info(`Bot conectado como ${client.user.tag}`);
 
-    const channelId = "1371686275538620486"; // Replace with the desired channel ID
+    const channelId = "1415115274360721591"; // Replace with the desired channel ID
     const channel = client.channels.cache.get(channelId);
 
     if (channel) {

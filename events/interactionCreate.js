@@ -23,6 +23,26 @@ module.exports = {
       return;
     }
 
+    // --- Context Menu Commands ---
+    if (interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) {
+        logger.warn(`Context menu não encontrado: ${interaction.commandName}`);
+        return;
+      }
+      try {
+        await command.execute(interaction, client);
+      } catch (error) {
+        logger.error(`Erro no context menu ${interaction.commandName}: ${error.message}`);
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp({ content: 'Ocorreu um erro ao executar este menu.', flags: 64 });
+        } else {
+          await interaction.reply({ content: 'Ocorreu um erro ao executar este menu.', flags: 64 });
+        }
+      }
+      return;
+    }
+
     // --- Modals delegados ao comando task ---
     if (interaction.isModalSubmit() && interaction.customId?.startsWith('task')) {
       const taskCmd = client.commands.get('task');
