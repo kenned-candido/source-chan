@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sendValveImage } = require('../../utils/valveScheduler');
-const { sendValveWiki } = require('../../utils/valveWiki');
+const { scheduleDailyImages } = require('../../services/valveScheduler');
+const { sendValveWiki } = require('../../services/valveWiki');
 
 module.exports = {
   data: new SlashCommandBuilder()

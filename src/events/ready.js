@@ -1,5 +1,5 @@
 const logger = require('../utils/logger.js');
-const { scheduleDailyImages } = require('../utils/valveScheduler.js');
+const { scheduleDailyImages } = require('../services/valveScheduler');
 
 module.exports = {
   name: 'ready',

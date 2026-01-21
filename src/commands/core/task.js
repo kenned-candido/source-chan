@@ -1,9 +1,9 @@
 const {
   SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle,
 } = require('discord.js');
-const config = require('../../config/config.json');
+const config = require('../../../config/config.json');
 const logger = require('../../utils/logger.js');
-const db = require('../../database/db');
+const db = require('../../../database/db');
 
 // --- Configurable emojis ---
 // Status Icons

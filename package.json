@@ -16,7 +16,8 @@
     "chalk": "^4.1.2",
     "dayjs": "^1.11.13",
     "discord.js": "^14.0.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "module-alias": "^2.2.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

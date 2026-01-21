@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
-const valveImages = require('../database/valve_archive.json');
-const config = require('../config/config.json');
-const logger = require('./logger.js');
+const valveImages = require('../../database/valve_archive.json');
+const config = require('../../config/config.json');
+const logger = require('../utils/logger.js');
 const { URL } = require('url');
 
 function getRandomValveImage() {
