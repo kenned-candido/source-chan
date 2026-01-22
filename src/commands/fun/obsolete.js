@@ -7,7 +7,7 @@ module.exports = {
     .setType(ApplicationCommandType.Message),
 
   async execute(interaction) {
-    const imagePath = path.join(__dirname, 'assets/images/obsolete.png');
+    const imagePath = path.join(__dirname, 'assets/images/memes/obsolete.png');
 
     await interaction.reply({
       files: [imagePath],

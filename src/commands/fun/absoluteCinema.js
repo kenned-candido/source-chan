@@ -7,7 +7,7 @@ module.exports = {
     .setType(ApplicationCommandType.Message),
 
   async execute(interaction) {
-    const imagePath = path.join(__dirname, 'assets/images/absolute-cinema.png');
+    const imagePath = path.join(__dirname, 'assets/images/memes/absolute-cinema.png');
 
     await interaction.reply({
       files: [imagePath],
