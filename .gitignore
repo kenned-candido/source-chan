@@ -1,6 +1,6 @@
 /.env
 /node_modules
-/logs
+/src/logs
 /database/tasklist.db
 /database/valve_archive.json
 /database/valve_wiki.json
